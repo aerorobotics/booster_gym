@@ -178,7 +178,6 @@ class Controller:
         time.sleep(0.001)
 
     def _publish_cmd(self):
-        time_pub_start = self.timer.get_time()
         while self.running:
             time_now = self.timer.get_time()
             if time_now < self.next_publish_time:
@@ -210,9 +209,9 @@ class Controller:
             time.sleep(0.001)
 
         
-        time_pub_end = self.timer.get_time()
-        time_pub = time_pub_end - time_pub_start 
-        pub_times.append(time_pub)
+            time_pub_end = self.timer.get_time()
+            time_pub = time_pub_end - time_now
+            pub_times.append(time_pub)
 
     def __enter__(self) -> "Controller":
         return self
