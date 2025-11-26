@@ -22,6 +22,9 @@ from utils.timer import TimerConfig, Timer
 from utils.policy import Policy
 
 
+pub_times = []
+run_times = []
+
 class Controller:
     def __init__(self, cfg_file) -> None:
         # Setup logging
@@ -43,9 +46,6 @@ class Controller:
         self.running = True
 
         self.publish_lock = threading.Lock()
-
-        self.pub_times = []
-        self.run_times = []
 
     def _init_timer(self):
         self.timer = Timer(TimerConfig(time_step=self.cfg["common"]["dt"]))
@@ -202,7 +202,7 @@ class Controller:
         
         time_pub_end = self.timer.get_time()
         time_pub = time_pub_end - time_pub_start 
-        self.pub_times.append(time_pub)
+        pub_times.append(time_pub)
 
     def __enter__(self) -> "Controller":
         return self
@@ -221,11 +221,11 @@ if __name__ == "__main__":
 
         # Print stats 
         print("Publish Times: \n ---------------")
-        pub_time_mean = np.mean(self.pub_times)
-        pub_freq = [1 / t for t in self.pub_times]
+        pub_time_mean = np.mean(pub_times)
+        pub_freq = [1 / t for t in pub_times]
         print("Average: ", pub_time_mean)
         print("Average Frequency", (1 / pub_time_mean))
-        print("Standard Deviation: ", np.std(self.pub_times))
+        print("Standard Deviation: ", np.std(pub_times))
         print("Freq Std Dev: ", np.std(pub_freq))
 
         print("\nShutting down...")
