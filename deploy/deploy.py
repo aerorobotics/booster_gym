@@ -110,12 +110,15 @@ class Controller:
 
         # Print stats 
         print("Publish Times: \n ---------------")
-        pub_time_mean = np.mean(self.pub_times)
-        #pub_freq = [1 / t for t in self.pub_times]
+
+        # There shouldn't be any zeros but just in case prevent divide by zero 
+        pub_times = [i for i in self.pub_times if i != 0]
+        pub_time_mean = np.mean(pub_times)
         print("Average: ", pub_time_mean)
         print("Average Frequency", (1 / pub_time_mean))
         print("Standard Deviation: ", np.std(self.pub_times))
-        #print("Freq Std Dev: ", np.std(pub_freq))
+        pub_freq = [1 / t for t in pub_times]
+        print("Freq Std Dev: ", np.std(pub_freq))
 
         print("\nShutting down...")
 
@@ -179,6 +182,7 @@ class Controller:
 
     def _publish_cmd(self):
         while self.running:
+            time_pub_start = time.perf_counter()
             time_now = self.timer.get_time()
             if time_now < self.next_publish_time:
                 time.sleep(0.001)
@@ -209,8 +213,8 @@ class Controller:
             time.sleep(0.001)
 
         
-            time_pub_end = self.timer.get_time()
-            time_pub = time_pub_end - time_now
+            time_pub_end = time.perf_counter()
+            time_pub = time_pub_end - time_pub_start 
             self.pub_times.append(time_pub)
 
     def __enter__(self) -> "Controller":
