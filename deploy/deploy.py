@@ -22,9 +22,6 @@ from utils.timer import TimerConfig, Timer
 from utils.policy import Policy
 
 
-pub_times = []
-run_times = []
-
 class Controller:
     def __init__(self, cfg_file) -> None:
         # Setup logging
@@ -46,6 +43,8 @@ class Controller:
         self.running = True
 
         self.publish_lock = threading.Lock()
+
+        self.pub_times = []
 
     def _init_timer(self):
         self.timer = Timer(TimerConfig(time_step=self.cfg["common"]["dt"]))
@@ -217,21 +216,21 @@ if __name__ == "__main__":
     import sys
     import os
 
-    def signal_handler(sig, frame):
+    def signal_handler(sig, frame, controller):
 
         # Print stats 
         print("Publish Times: \n ---------------")
-        pub_time_mean = np.mean(pub_times)
-        pub_freq = [1 / t for t in pub_times]
+        pub_time_mean = np.mean(controller.pub_times)
+        pub_freq = [1 / t for t in controller.pub_times]
         print("Average: ", pub_time_mean)
         print("Average Frequency", (1 / pub_time_mean))
-        print("Standard Deviation: ", np.std(pub_times))
+        print("Standard Deviation: ", np.std(controller.pub_times))
         print("Freq Std Dev: ", np.std(pub_freq))
 
         print("\nShutting down...")
         sys.exit(0)
 
-    signal.signal(signal.SIGINT, signal_handler)
+
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, type=str, help="Name of the configuration file.")
@@ -242,6 +241,22 @@ if __name__ == "__main__":
     print(f"Starting custom controller, connecting to {args.net} ...")
     ChannelFactory.Instance().Init(0, args.net)
 
+    controller = Controller(cfg_file)
+    time.sleep(2)
+    controller.start_custom_mode_conditionally()
+    controller.start_rl_gait_conditionally()
+
+    signal.signal(signal.SIGINT, signal_handler, controller)
+
+    try:
+        while controller.running:
+            controller.run()
+        controller.client.ChangeMode(RobotMode.kDamping)
+    except KeyboardInterrupt:
+        print("\nKeyboard interrupt received. Cleaning up...")
+        controller.cleanup()
+
+    '''
     with Controller(cfg_file) as controller:
         time.sleep(2)  # Wait for channels to initialize
         print("Initialization complete.")
@@ -255,3 +270,4 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             print("\nKeyboard interrupt received. Cleaning up...")
             controller.cleanup()
+    '''
