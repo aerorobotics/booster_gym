@@ -44,6 +44,9 @@ class Controller:
 
         self.publish_lock = threading.Lock()
 
+        self.pub_times = []
+        self.run_times = []
+
     def _init_timer(self):
         self.timer = Timer(TimerConfig(time_step=self.cfg["common"]["dt"]))
         self.next_publish_time = self.timer.get_time()
@@ -165,6 +168,7 @@ class Controller:
         time.sleep(0.001)
 
     def _publish_cmd(self):
+        time_pub_start = self.timer.get_time()
         while self.running:
             time_now = self.timer.get_time()
             if time_now < self.next_publish_time:
@@ -195,6 +199,11 @@ class Controller:
             self.logger.debug(f"Publish took {(publish_time - start_time)*1000:.4f} ms")
             time.sleep(0.001)
 
+        
+        time_pub_end = self.timer.get_time()
+        time_pub = time_pub_end - time_pub_start 
+        self.pub_times.append(time_pub)
+
     def __enter__(self) -> "Controller":
         return self
 
@@ -209,6 +218,16 @@ if __name__ == "__main__":
     import os
 
     def signal_handler(sig, frame):
+
+        # Print stats 
+        print("Publish Times: \n ---------------")
+        pub_time_mean = np.mean(self.pub_times)
+        pub_freq = [1 / t for t in self.pub_times]
+        print("Average: ", pub_time_mean)
+        print("Average Frequency", (1 / pub_time_mean))
+        print("Standard Deviation: ", np.std(self.pub_times))
+        print("Freq Std Dev: ", np.std(pub_freq))
+
         print("\nShutting down...")
         sys.exit(0)
 
