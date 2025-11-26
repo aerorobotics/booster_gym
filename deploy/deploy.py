@@ -116,7 +116,9 @@ class Controller:
         pub_time_mean = np.mean(pub_times)
         print("Average: ", pub_time_mean)
         print("Average Frequency", (1 / pub_time_mean))
-        print("Standard Deviation: ", np.std(self.pub_times))
+        print("Standard Deviation: ", np.std(pub_times))
+        print("Minimum pub time: ", np.min(pub_times))
+        print("Maximum pub time: ", np.max(pub_times))
         pub_freq = [1 / t for t in pub_times]
         print("Freq Std Dev: ", np.std(pub_freq))
 
