@@ -111,11 +111,11 @@ class Controller:
         # Print stats 
         print("Publish Times: \n ---------------")
         pub_time_mean = np.mean(self.pub_times)
-        pub_freq = [1 / t for t in self.pub_times]
+        #pub_freq = [1 / t for t in self.pub_times]
         print("Average: ", pub_time_mean)
         print("Average Frequency", (1 / pub_time_mean))
         print("Standard Deviation: ", np.std(self.pub_times))
-        print("Freq Std Dev: ", np.std(pub_freq))
+        #print("Freq Std Dev: ", np.std(pub_freq))
 
         print("\nShutting down...")
 
@@ -211,7 +211,7 @@ class Controller:
         
             time_pub_end = self.timer.get_time()
             time_pub = time_pub_end - time_now
-            pub_times.append(time_pub)
+            self.pub_times.append(time_pub)
 
     def __enter__(self) -> "Controller":
         return self
