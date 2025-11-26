@@ -216,8 +216,7 @@ if __name__ == "__main__":
     import sys
     import os
 
-    def signal_handler(sig, frame, controller):
-
+    def sig_handler(sig, frame, controller):
         # Print stats 
         print("Publish Times: \n ---------------")
         pub_time_mean = np.mean(controller.pub_times)
@@ -230,6 +229,14 @@ if __name__ == "__main__":
         print("\nShutting down...")
         sys.exit(0)
 
+    def signal_handler(sig, frame, controller):
+        print("\nShutting down...")
+        sys.exit(0)
+
+    def register_handler(controller):
+        global sig_handler
+        sig_handler = partial(sig_handler, controller=controller)
+        signal.signal(signal.SIGTERM, sig_handler)
 
 
     parser = argparse.ArgumentParser()
@@ -246,7 +253,13 @@ if __name__ == "__main__":
     controller.start_custom_mode_conditionally()
     controller.start_rl_gait_conditionally()
 
-    signal.signal(signal.SIGINT, signal_handler, controller)
+    def register_handler(controller):
+        global sig_handler
+        sig_handler = partial(sig_handler, controller=controller)
+        signal.signal(signal.SIGTERM, sig_handler)
+
+
+    #signal.signal(signal.SIGINT, signal_handler, controller)
 
     try:
         while controller.running:
