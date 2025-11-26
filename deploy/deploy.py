@@ -108,6 +108,17 @@ class Controller:
         if hasattr(self, "publish_runner") and getattr(self, "publish_runner") != None:
             self.publish_runner.join(timeout=1.0)
 
+        # Print stats 
+        print("Publish Times: \n ---------------")
+        pub_time_mean = np.mean(self.pub_times)
+        pub_freq = [1 / t for t in self.pub_times]
+        print("Average: ", pub_time_mean)
+        print("Average Frequency", (1 / pub_time_mean))
+        print("Standard Deviation: ", np.std(self.pub_times))
+        print("Freq Std Dev: ", np.std(pub_freq))
+
+        print("\nShutting down...")
+
     def start_custom_mode_conditionally(self):
         print(f"{self.remoteControlService.get_custom_mode_operation_hint()}")
         while True:
@@ -217,16 +228,6 @@ if __name__ == "__main__":
     import os
 
     def sig_handler(sig, frame, controller):
-        # Print stats 
-        print("Publish Times: \n ---------------")
-        pub_time_mean = np.mean(controller.pub_times)
-        pub_freq = [1 / t for t in controller.pub_times]
-        print("Average: ", pub_time_mean)
-        print("Average Frequency", (1 / pub_time_mean))
-        print("Standard Deviation: ", np.std(controller.pub_times))
-        print("Freq Std Dev: ", np.std(pub_freq))
-
-        print("\nShutting down...")
         sys.exit(0)
 
     def signal_handler(sig, frame, controller):
